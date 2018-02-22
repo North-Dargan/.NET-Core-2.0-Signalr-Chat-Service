@@ -65,6 +65,9 @@
                     // Add the message to the page.
                     var liElement = document.createElement('li'); 
                     liElement.setAttribute('connId', connId);
+                    liElement.onclick = function () {
+                        // FUNCTION GOES HERE
+                    };
                     liElement.innerHTML = '<strong>' + encodedName + '</strong>:&nbsp;&nbsp;' + encodedMsg;
                     document.getElementById('discussion').appendChild(liElement);
                 });
