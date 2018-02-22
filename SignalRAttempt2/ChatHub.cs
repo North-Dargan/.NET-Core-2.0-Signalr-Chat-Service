@@ -12,7 +12,7 @@ namespace SignalRAttempt2
         public void Send(string name, string message)
         {
             //Send a Message to all clients;
-            Clients.All.InvokeAsync("broadcastMessage", name, message);
+            Clients.All.InvokeAsync("broadcastMessage", name, message, Context.ConnectionId);
 
 
             //Send a message to just one client

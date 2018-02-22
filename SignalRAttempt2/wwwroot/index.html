@@ -58,12 +58,13 @@
             // Start the connection.
             startConnection('/chat', function (connection) {
                 // Create a function that the hub can call to broadcast messages.
-                connection.on('broadcastMessage', function (name, message) {
+                connection.on('broadcastMessage', function (name, message, connId) {
                     // Html encode display name and message.
                     var encodedName = name;
                     var encodedMsg = message;
                     // Add the message to the page.
-                    var liElement = document.createElement('li');                   
+                    var liElement = document.createElement('li'); 
+                    liElement.setAttribute('connId', connId);
                     liElement.innerHTML = '<strong>' + encodedName + '</strong>:&nbsp;&nbsp;' + encodedMsg;
                     document.getElementById('discussion').appendChild(liElement);
                 });
