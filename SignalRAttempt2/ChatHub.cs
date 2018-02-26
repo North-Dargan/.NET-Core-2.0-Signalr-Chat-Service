@@ -9,10 +9,11 @@ namespace SignalRAttempt2
     public class ChatHub: Hub
     {
         //Call the broadcastMessage method to update clients.
-        public void Send(string name, string message)
+        public void Send(string name, string message, string groupName)
         {
             //Send a Message to all clients;
-            Clients.All.InvokeAsync("broadcastMessage", name, message, Context.ConnectionId);
+            if (groupName == "main") Clients.All.InvokeAsync("broadcastMessage", name, message, Context.ConnectionId);
+            else Clients.Group(groupName).InvokeAsync("broadcastMessage", name, message, Context.ConnectionId);
         }
 
         /// <summary>
