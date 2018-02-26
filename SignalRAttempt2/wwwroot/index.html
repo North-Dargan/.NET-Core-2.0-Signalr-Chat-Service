@@ -11,12 +11,12 @@
         
     </div>
     <div id="main-panel">
-        <div class="discussion-holder">
+        <div class="discussion-holder" signalr-group="main" id="main-chat">
             <label>Main Chat</label>
             <ul id="discussion-main">
-                <li connid="66660563-d584-41b5-ac9d-f14386025620"><strong>DB</strong>:&nbsp;&nbsp;we gotta do something about all these crabs.</li>
+                <!--<li connid="66660563-d584-41b5-ac9d-f14386025620"><strong>DB</strong>:&nbsp;&nbsp;we gotta do something about all these crabs.</li>
                 <li connid="66660563-d584-41b5-ac9d-f14386025620"><strong>DB</strong>:&nbsp;&nbsp;Dave rocks</li>
-                <li connid="66660563-d584-41b5-ac9d-f14386025620"><strong>DB</strong>:&nbsp;&nbsp;Wheres the samich guy at again?</li>
+                <li connid="66660563-d584-41b5-ac9d-f14386025620"><strong>DB</strong>:&nbsp;&nbsp;Wheres the samich guy at again?</li>-->
             </ul>
         </div>
         <!--<div class="discussion-holder">
@@ -48,18 +48,13 @@
             var messageInput = document.getElementById('message');
             var mainPanel = document.getElementById('main-panel');
             // Get the user name and store it to prepend to messages.
-            var name = prompt('Enter your name:', '');
+            var name = prompt('Enter your call sign:', '');
             // Set initial focus to message input box.
             messageInput.focus();
 
-            //Declare the div container
-            var newDiv = document.createElement("div");
-            newDiv.className = "container";
-            newDiv.setAttribute('signalr-group', groupName);
-            var li = document.createElement("ul");
-            li.id = "groupDiscussion";
-            newDiv.appendChild(li); 
-
+            // Setup all the events on the main div thats hardcoded
+            var newDiv = document.getElementById("main-chat");
+            newDiv.className += " current-convo";
           
 
             // Start the connection.
@@ -91,6 +86,7 @@
                     // TODO: make a new discussion holder with the conversation panel in it all coded and proper and sht.
                     //1. add the new div
                         // clicking it should scope the inputs to just this conversation and update the css appropriately.
+                        // this means removing the current-convo flag from any active elements and only setting it here. aka: only one active conversation at a time.
                     //2. put a label in there with this persons call sign
                     //3. add a ul to hold the conversation with this person.
 
@@ -98,8 +94,12 @@
                     var newDiv = document.createElement('div');
                     newDiv.setAttribute('class', 'discussion-holder');
                     newDiv.setAttribute('signalr-group', groupName);
+                    currentGroup = groupName;
                     newDiv.className += ' current-convo'; // default to this conversation when the user starts a new group.
-                    newDiv.onclick =function (evnt) {
+                    // Need to pull this class off any element that is currently holding it.
+                    var listo = document.getElementsByClassName('current-convo')
+                    Array.prototype.forEach.call(listo, function (element) { element.classList.remove('current-convo') })
+                    newDiv.onclick = function (evnt) {
                         // If they click it then we need to make sure that this conversation is being used.
                         // 1. highlight the panel so its obvious to the user what is happening
                         evnt.target.className += ' current-convo'; 
