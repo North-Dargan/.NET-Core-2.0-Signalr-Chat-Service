@@ -10,22 +10,25 @@
         <input type="button" id="sendmessage" value="Send" />
         
     </div>
-    <div class="discussion-holder">
-        <label>Main Chat</label>
-        <ul id="discussion-main">
-            <li connid="66660563-d584-41b5-ac9d-f14386025620"><strong>DB</strong>:&nbsp;&nbsp;we gotta do something about all these crabs.</li>
-            <li connid="66660563-d584-41b5-ac9d-f14386025620"><strong>DB</strong>:&nbsp;&nbsp;Dave rocks</li>
-            <li connid="66660563-d584-41b5-ac9d-f14386025620"><strong>DB</strong>:&nbsp;&nbsp;Wheres the samich guy at again?</li>
-        </ul>
+    <div id="main-panel">
+        <div class="discussion-holder">
+            <label>Main Chat</label>
+            <ul id="discussion-main">
+                <li connid="66660563-d584-41b5-ac9d-f14386025620"><strong>DB</strong>:&nbsp;&nbsp;we gotta do something about all these crabs.</li>
+                <li connid="66660563-d584-41b5-ac9d-f14386025620"><strong>DB</strong>:&nbsp;&nbsp;Dave rocks</li>
+                <li connid="66660563-d584-41b5-ac9d-f14386025620"><strong>DB</strong>:&nbsp;&nbsp;Wheres the samich guy at again?</li>
+            </ul>
+        </div>
+        <!--<div class="discussion-holder">
+            <label>DB Chat</label>
+            <ul id="discussion-db">
+                <li connid="66660563-d584-41b5-ac9d-f14386025620"><strong>DB</strong>:&nbsp;&nbsp;we gotta do something about all these crabs.</li>
+                <li connid="66660563-d584-41b5-ac9d-f14386025620"><strong>DB</strong>:&nbsp;&nbsp;Dave rocks</li>
+                <li connid="66660563-d584-41b5-ac9d-f14386025620"><strong>DB</strong>:&nbsp;&nbsp;Wheres the samich guy at again?</li>
+            </ul>
+        </div>-->
     </div>
-    <div class="discussion-holder">
-        <label>DB Chat</label>
-        <ul id="discussion-db">
-            <li connid="66660563-d584-41b5-ac9d-f14386025620"><strong>DB</strong>:&nbsp;&nbsp;we gotta do something about all these crabs.</li>
-            <li connid="66660563-d584-41b5-ac9d-f14386025620"><strong>DB</strong>:&nbsp;&nbsp;Dave rocks</li>
-            <li connid="66660563-d584-41b5-ac9d-f14386025620"><strong>DB</strong>:&nbsp;&nbsp;Wheres the samich guy at again?</li>
-        </ul>
-    </div>
+
     <!--Reference the SignalR library. -->
     <script>
         if (typeof Promise === 'undefined') {
@@ -38,10 +41,12 @@
     <!--Add script to update the page and send messages.-->
     <script type="text/javascript">
         var tile_colors = ['AAFF00', 'FFAA00', 'FF00AA', 'AA00FF', '00AAFF'];
+        var groupsImAlreadyIn = [];
+        var currentGroup;
         document.addEventListener('DOMContentLoaded', function () {
 
             var messageInput = document.getElementById('message');
-
+            var mainPanel = document.getElementById('main-panel');
             // Get the user name and store it to prepend to messages.
             var name = prompt('Enter your name:', '');
             // Set initial focus to message input box.
@@ -50,6 +55,7 @@
             //Declare the div container
             var newDiv = document.createElement("div");
             newDiv.className = "container";
+            newDiv.setAttribute('signalr-group', groupName);
             var li = document.createElement("ul");
             li.id = "groupDiscussion";
             newDiv.appendChild(li); 
@@ -80,6 +86,8 @@
                 });
 
                 connection.on('groupjoined', function (groupName, usrToChatWith) {
+                    groupsImAlreadyIn.push(groupName); // Keep track of what groups you are already in so we are not creating duplicates.
+
                     // TODO: make a new discussion holder with the conversation panel in it all coded and proper and sht.
                     //1. add the new div
                         // clicking it should scope the inputs to just this conversation and update the css appropriately.
@@ -90,11 +98,13 @@
                     var newDiv = document.createElement('div');
                     newDiv.setAttribute('class', 'discussion-holder');
                     newDiv.setAttribute('signalr-group', groupName);
-                    newDiv.setAttribute('class', 'current-convo'); // default to this conversation when the user starts a new group.
+                    newDiv.className += ' current-convo'; // default to this conversation when the user starts a new group.
                     newDiv.onclick =function (evnt) {
                         // If they click it then we need to make sure that this conversation is being used.
                         // 1. highlight the panel so its obvious to the user what is happening
+                        evnt.target.className += ' current-convo'; 
                         // 2. set a flag so the message sending code knows we are deailing with a group.
+                        currentGroup = evnt.target.attributes['signalr-group'].value;
                     }
 
                     //2. Add a label with the user in questions name 
@@ -102,6 +112,14 @@
                     lbl.innerText = usrToChatWith + '-Chat';
                     newDiv.appendChild(lbl);
 
+                    //3.
+                    var li = document.createElement("ul");
+                    li.id = "groupDiscussion";
+                    newDiv.appendChild(li); 
+
+                    // Lastly append the new div to our collection of chat panels.
+                    mainPanel.appendChild(newDiv);
+                    
                 })
 
             })
@@ -109,6 +127,7 @@
                     console.log('connection started');
                     document.getElementById('sendmessage').addEventListener('click', function (event) {
                         // Call the Send method on the hub.
+                        // TODO: rework this to incorporate the current group if there is one set, otherwise just send messages to the main chat.
                         connection.invoke('send', name, messageInput.value);                       
 
                         // Clear text box and reset focus for next comment.
