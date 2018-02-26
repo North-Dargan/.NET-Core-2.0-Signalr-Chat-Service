@@ -11,9 +11,9 @@
         
     </div>
     <div id="main-panel">
-        <div class="discussion-holder" signalr-group="main" id="main-chat">
+        <div class="discussion-holder main" signalr-group="main" id="main-chat">
             <label>Main Chat</label>
-            <ul id="discussion-main">
+            <ul id="main">
             </ul>
         </div>
     </div>
@@ -32,7 +32,7 @@
         var tile_colors = ['AAFF00', 'FFAA00', 'FF00AA', 'AA00FF', '00AAFF'];
         var groupsImAlreadyIn = [];
         var currentGroup = 'main';
-        var user_name;
+        var user_name = null;
         function isInChat(userName) {
             return groupsImAlreadyIn.filter((e) => {
                 return e.user == userName;
@@ -67,7 +67,7 @@
             // Start the connection.
             startConnection('/chat', function (connection) {
                 // Create a function that the hub can call to broadcast messages.
-                connection.on('broadcastMessage', function (name, message, connId) {
+                connection.on('broadcastMessage', function (name, message, connId, groupName) {
                     // Html encode display name and message.
                     var encodedName = name;
                     var encodedMsg = message;
@@ -96,7 +96,8 @@
                     }
                  
                     liElement.innerHTML = '<strong>' + encodedName + '</strong>:&nbsp;&nbsp;' + encodedMsg;
-                    document.getElementById('discussion-main').appendChild(liElement);
+                    document.getElementById(groupName).appendChild(liElement);
+                    //document.getElementById('discussion-main').appendChild(liElement);
                 });
 
                 connection.on('groupjoined', function (groupName, usrToChatWith) {
@@ -138,7 +139,7 @@
 
                     //3.
                     var li = document.createElement("ul");
-                    li.id = "groupDiscussion";
+                    li.id = groupName;
                     newDiv.appendChild(li); 
 
                     // Lastly append the new div to our collection of chat panels.
@@ -153,7 +154,7 @@
                     document.getElementById('sendmessage').addEventListener('click', function (event) {
                         // Call the Send method on the hub.
                         // TODO: rework this to incorporate the current group if there is one set, otherwise just send messages to the main chat.
-                        connection.invoke('send', name, messageInput.value, currentGroup);                       
+                        connection.invoke('send', user_name, messageInput.value, currentGroup);                       
 
                         // Clear text box and reset focus for next comment.
                         messageInput.value = '';

@@ -12,8 +12,8 @@ namespace SignalRAttempt2
         public void Send(string name, string message, string groupName)
         {
             //Send a Message to all clients;
-            if (groupName == "main") Clients.All.InvokeAsync("broadcastMessage", name, message, Context.ConnectionId);
-            else Clients.Group(groupName).InvokeAsync("broadcastMessage", name, message, Context.ConnectionId);
+            if (groupName == "main") Clients.All.InvokeAsync("broadcastMessage", name, message, Context.ConnectionId, "main");
+            else Clients.Group(groupName).InvokeAsync("broadcastMessage", name, message, Context.ConnectionId, groupName);
         }
 
         /// <summary>
