@@ -43,7 +43,7 @@
         var tile_colors = ['AAFF00', 'FFAA00', 'FF00AA', 'AA00FF', '00AAFF'];
         var groupsImAlreadyIn = [];
         var currentGroup;
-
+        var name;
         function isInChat(userName) {
             return groupsImAlreadyIn.filter((e) => {
                 return e.user == userName;
@@ -55,7 +55,8 @@
             var messageInput = document.getElementById('message');
             var mainPanel = document.getElementById('main-panel');
             // Get the user name and store it to prepend to messages.
-            var name = prompt('Enter your call sign:', '');
+            name = prompt('Enter your call sign:', '');
+            document.title = name + ' Chat';
             // Set initial focus to message input box.
             messageInput.focus();
 
@@ -65,14 +66,9 @@
             newDiv.onclick = function (evnt) {
                 // If they click it then we need to make sure that this conversation is being used.
                 // 1. highlight the panel so its obvious to the user what is happening
-
-
-                evnt.currentTarget.classList.remove('current-convo');
-                evnt.currentTarget.classList.add('current-convo');
-
-                //1.a need to clear off all the in use msg panels
                 var listo = document.getElementsByClassName('current-convo')
                 Array.prototype.forEach.call(listo, function (element) { element.classList.remove('current-convo') })
+                evnt.currentTarget.classList.add('current-convo');
 
                 // 2. set a flag so the message sending code knows we are deailing with a group.
                 currentGroup = evnt.currentTarget.attributes['signalr-group'].value;
@@ -82,7 +78,7 @@
             // Start the connection.
             startConnection('/chat', function (connection) {
                 // Create a function that the hub can call to broadcast messages.
-                connection.on('broadcastMessage', function (name, message, connId) {
+                connection.on('broadcastMessage', function (name, message, connId, currentGroup) {
                     // Html encode display name and message.
                     var encodedName = name;
                     var encodedMsg = message;
@@ -91,22 +87,25 @@
                     liElement.setAttribute('connId', connId);
                     liElement.setAttribute('user', encodedName); // Need to set the username in an attribute so we can pull it off to call joingroup with.
 
-                    // Are they already in a group with this person? if so then we do not want to register any handlers?
-                    liElement.onclick = function (evnt) {
-                        var usr = evnt.currentTarget.attributes['user'].value
-                        if (isInChat(usr)) {
-                            console.log('already in chat with user :', usr);
-                            return;
-                        }
+                    // If I am the person that sent this message then we dont want to register event handlers.. because I cant DM with myself right?
+                    if (encodedName != name) {
+                        liElement.onclick = function (evnt) {
+                            var usr = evnt.currentTarget.attributes['user'].value
+                            if (isInChat(usr)) {
+                                console.log('already in chat with user :', usr);
+                                return;
+                            }
 
-                        //Need the users connection ID
-                        var connId = evnt.currentTarget.attributes['connid'].value
-                        // also need the users name
-                        var user_name = evnt.currentTarget.attributes['user'].value
-                        // Call the server and join these users into a DM group.
-                        connection.invoke('joinGroup', connId, user_name);
-                        event.stopPropagation();
-                    };
+                            //Need the users connection ID
+                            var connId = evnt.currentTarget.attributes['connid'].value
+                            // also need the users name
+                            var user_name = evnt.currentTarget.attributes['user'].value
+                            // Call the server and join these users into a DM group.
+                            connection.invoke('joinGroup', connId, user_name);
+                            event.stopPropagation();
+                        };
+                    }
+                 
                     liElement.innerHTML = '<strong>' + encodedName + '</strong>:&nbsp;&nbsp;' + encodedMsg;
                     document.getElementById('discussion-main').appendChild(liElement);
                 });
@@ -134,22 +133,18 @@
                     newDiv.onclick = function (evnt) {
                         // If they click it then we need to make sure that this conversation is being used.
                         // 1. highlight the panel so its obvious to the user what is happening
-                        
-                      
-                        evnt.currentTarget.classList.remove('current-convo'); 
-                        evnt.currentTarget.classList.add('current-convo'); 
-
-                        //1.a need to clear off all the in use msg panels
                         var listo = document.getElementsByClassName('current-convo')
                         Array.prototype.forEach.call(listo, function (element) { element.classList.remove('current-convo') })
+                        evnt.currentTarget.classList.add('current-convo'); 
 
                         // 2. set a flag so the message sending code knows we are deailing with a group.
                         currentGroup = evnt.currentTarget.attributes['signalr-group'].value;
+                        console.log('clicked on the group', currentGroup);
                     }
 
                     //2. Add a label with the user in questions name 
                     var lbl = document.createElement("label");
-                    lbl.innerText = usrToChatWith + '-Chat';
+                    lbl.innerText = usrToChatWith + '-Chat : group-' + currentGroup;
                     newDiv.appendChild(lbl);
 
                     //3.
@@ -159,6 +154,7 @@
 
                     // Lastly append the new div to our collection of chat panels.
                     mainPanel.appendChild(newDiv);
+
                     
                 })
 
@@ -168,7 +164,7 @@
                     document.getElementById('sendmessage').addEventListener('click', function (event) {
                         // Call the Send method on the hub.
                         // TODO: rework this to incorporate the current group if there is one set, otherwise just send messages to the main chat.
-                        connection.invoke('send', name, messageInput.value);                       
+                        connection.invoke('send', name, messageInput.value, currentGroup);                       
 
                         // Clear text box and reset focus for next comment.
                         messageInput.value = '';
