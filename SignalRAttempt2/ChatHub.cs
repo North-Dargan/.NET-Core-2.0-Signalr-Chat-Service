@@ -30,19 +30,6 @@ namespace SignalRAttempt2
             await Clients.Group(group_name).InvokeAsync("groupjoined",group_name, userToChat);
         }
 
-        public Task LeaveGroup(string groupName)
-        {
-            return Groups.RemoveAsync(Context.ConnectionId, groupName);
-        }
-
-        //Call the broadcastMessage method to update clients.
-        public void SendGroupMessage(string groupName, string name, string message)
-        {           
-
-            Clients.Group(groupName).InvokeAsync("broadcastGroupMessage", name, message);
-             
-        }
-
         private string GroupName()
         {
             var randy = new Random();
@@ -51,15 +38,5 @@ namespace SignalRAttempt2
                 .Select(x => pool[randy.Next(0, pool.Length)]);
             return new string(chars.ToArray());
         }
-
-
-
-
-
-
-
-
     }
-
-   
 }
