@@ -19,6 +19,8 @@ namespace SignalRAttempt2
 
         public static IWebHost BuildWebHost(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
+                .UseKestrel()
+                //.UseUrls("http://daverocks.com")
                 .UseStartup<Startup>()
                 .Build();
     }
