@@ -43,6 +43,13 @@
         var tile_colors = ['AAFF00', 'FFAA00', 'FF00AA', 'AA00FF', '00AAFF'];
         var groupsImAlreadyIn = [];
         var currentGroup;
+
+        function isInChat(userName) {
+            return groupsImAlreadyIn.filter((e) => {
+                return e.user == userName;
+            }).length > 0;
+        };
+
         document.addEventListener('DOMContentLoaded', function () {
 
             var messageInput = document.getElementById('message');
@@ -55,6 +62,21 @@
             // Setup all the events on the main div thats hardcoded
             var newDiv = document.getElementById("main-chat");
             newDiv.className += " current-convo";
+            newDiv.onclick = function (evnt) {
+                // If they click it then we need to make sure that this conversation is being used.
+                // 1. highlight the panel so its obvious to the user what is happening
+
+
+                evnt.currentTarget.classList.remove('current-convo');
+                evnt.currentTarget.classList.add('current-convo');
+
+                //1.a need to clear off all the in use msg panels
+                var listo = document.getElementsByClassName('current-convo')
+                Array.prototype.forEach.call(listo, function (element) { element.classList.remove('current-convo') })
+
+                // 2. set a flag so the message sending code knows we are deailing with a group.
+                currentGroup = evnt.currentTarget.attributes['signalr-group'].value;
+            }
           
 
             // Start the connection.
@@ -68,20 +90,29 @@
                     var liElement = document.createElement('li'); 
                     liElement.setAttribute('connId', connId);
                     liElement.setAttribute('user', encodedName); // Need to set the username in an attribute so we can pull it off to call joingroup with.
+
+                    // Are they already in a group with this person? if so then we do not want to register any handlers?
                     liElement.onclick = function (evnt) {
+                        var usr = evnt.currentTarget.attributes['user'].value
+                        if (isInChat(usr)) {
+                            console.log('already in chat with user :', usr);
+                            return;
+                        }
+
                         //Need the users connection ID
-                        var connId = evnt.target.attributes['connid'].value
+                        var connId = evnt.currentTarget.attributes['connid'].value
                         // also need the users name
-                        var user_name = evnt.target.attributes['user'].value
+                        var user_name = evnt.currentTarget.attributes['user'].value
                         // Call the server and join these users into a DM group.
                         connection.invoke('joinGroup', connId, user_name);
+                        event.stopPropagation();
                     };
                     liElement.innerHTML = '<strong>' + encodedName + '</strong>:&nbsp;&nbsp;' + encodedMsg;
                     document.getElementById('discussion-main').appendChild(liElement);
                 });
 
                 connection.on('groupjoined', function (groupName, usrToChatWith) {
-                    groupsImAlreadyIn.push(groupName); // Keep track of what groups you are already in so we are not creating duplicates.
+                    groupsImAlreadyIn.push({ group: groupName, user: usrToChatWith }); // Keep track of what groups you are already in so we are not creating duplicates.
 
                     // TODO: make a new discussion holder with the conversation panel in it all coded and proper and sht.
                     //1. add the new div
@@ -90,6 +121,7 @@
                     //2. put a label in there with this persons call sign
                     //3. add a ul to hold the conversation with this person.
 
+                    //4. Eventually we need to pull click handlers off of every LI element that comes in from this person so its not just adding in fucking panels for now reason.
                     //1.
                     var newDiv = document.createElement('div');
                     newDiv.setAttribute('class', 'discussion-holder');
@@ -102,9 +134,17 @@
                     newDiv.onclick = function (evnt) {
                         // If they click it then we need to make sure that this conversation is being used.
                         // 1. highlight the panel so its obvious to the user what is happening
-                        evnt.target.className += ' current-convo'; 
+                        
+                      
+                        evnt.currentTarget.classList.remove('current-convo'); 
+                        evnt.currentTarget.classList.add('current-convo'); 
+
+                        //1.a need to clear off all the in use msg panels
+                        var listo = document.getElementsByClassName('current-convo')
+                        Array.prototype.forEach.call(listo, function (element) { element.classList.remove('current-convo') })
+
                         // 2. set a flag so the message sending code knows we are deailing with a group.
-                        currentGroup = evnt.target.attributes['signalr-group'].value;
+                        currentGroup = evnt.currentTarget.attributes['signalr-group'].value;
                     }
 
                     //2. Add a label with the user in questions name 
