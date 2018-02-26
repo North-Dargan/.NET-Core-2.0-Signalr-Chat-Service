@@ -15,9 +15,9 @@
     <div class="container" id="divMain">
         <input type="text" id="message" />
         <input type="button" id="sendmessage" value="Send" />
-        <input type="button" id="joingroup1" value="Join Group 1" />
+        <!--<input type="button" id="joingroup1" value="Join Group 1" />
         <input type="text" id="groupmessage" />
-        <input type="button" id="sendgroupmessage" value="Send Group Message" />
+        <input type="button" id="sendgroupmessage" value="Send Group Message" />-->
 
         <!--<input type="hidden" id="displayname" />-->
         <!----><ul id="discussion"></ul>
@@ -39,7 +39,7 @@
         document.addEventListener('DOMContentLoaded', function () {
 
             var messageInput = document.getElementById('message');
-            var groupMessageInput = document.getElementById('groupmessage');
+            //var groupMessageInput = document.getElementById('groupmessage');
 
             // Get the user name and store it to prepend to messages.
             var name = prompt('Enter your name:', '');
@@ -94,22 +94,22 @@
                         event.preventDefault();
                     });
 
-                    document.getElementById('joingroup1').addEventListener('click', function (event) {
-                        connection.invoke('joingroup', 'group1', name);  
+                    //document.getElementById('joingroup1').addEventListener('click', function (event) {
+                    //    connection.invoke('joingroup', 'group1', name);  
 
-                        document.getElementById('divMain').insertAdjacentElement('afterend', newDiv);                        
+                    //    document.getElementById('divMain').insertAdjacentElement('afterend', newDiv);                        
                         
-                    })
+                    //})
 
-                    document.getElementById('sendgroupmessage').addEventListener('click', function (event) {
-                        // Call the Send method on the hub.
-                        connection.invoke('sendgroupmessage', 'group1', name, groupMessageInput.value);
+                    //document.getElementById('sendgroupmessage').addEventListener('click', function (event) {
+                    //    // Call the Send method on the hub.
+                    //    connection.invoke('sendgroupmessage', 'group1', name, groupMessageInput.value);
 
-                        // Clear text box and reset focus for next comment.
-                        groupMessageInput.value = '';
-                        groupMessageInput.focus();
-                        event.preventDefault();
-                    })
+                    //    // Clear text box and reset focus for next comment.
+                    //    groupMessageInput.value = '';
+                    //    groupMessageInput.focus();
+                    //    event.preventDefault();
+                    //})
 
 
 
