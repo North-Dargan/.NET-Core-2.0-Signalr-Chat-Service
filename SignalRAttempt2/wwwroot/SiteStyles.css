@@ -1,0 +1,45 @@
+﻿/*TODO:this should really be a less file but we will get there eventually*/
+@-webkit-keyframes greenPulse {
+    from {
+        background-color: #00DFFC;
+        -webkit-box-shadow: 0 0 9px #343838;
+    }
+
+    50% {
+        background-color: #00B4CC;
+        -webkit-box-shadow: 0 0 18px #00DFFC;
+    }
+
+    to {
+        background-color: #00DFFC;
+        -webkit-box-shadow: 0 0 9px #343838;
+    }
+}
+
+.current-convo {
+    -webkit-animation-name: greenPulse;
+    -webkit-animation-duration: 2s;
+    -webkit-animation-iteration-count: infinite;
+}
+
+.input-container {
+    background-color: #99CCFF;
+    border: thick solid #808080;
+    padding: 20px;
+    margin: 20px;
+}
+
+.discussion-holder {
+    width: 25%;
+    border: 1px solid black;
+    margin: 20px;
+    float: left;
+    border-radius: 4px;
+    padding-top: 10px;
+}
+
+.discussion-holder > label {
+    margin: 20px;
+    font-size: 20px;
+    font-family: 'Georgia';
+}

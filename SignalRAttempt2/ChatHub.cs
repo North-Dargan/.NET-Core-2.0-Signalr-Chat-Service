@@ -13,22 +13,20 @@ namespace SignalRAttempt2
         {
             //Send a Message to all clients;
             Clients.All.InvokeAsync("broadcastMessage", name, message, Context.ConnectionId);
-
-
-            //Send a message to just one client
-            //Clients.Client("connectionID").InvokeAsync("br")
-
-            //this.Groups.   
         }
 
-        public Task JoinGroup(string groupName, string name)
+        /// <summary>
+        /// This call will put the calling user into a group with the connectionID passed in the "connection" parameter then call groupJoined on the users in that group
+        /// which will trigger setup of all the panels and chat shit on the frint end.
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <returns></returns>
+        public async Task JoinGroup(string connection)
         {
-            //Clients.All.InvokeAsync("broadcastMessage", Context.ConnectionId, Context.ConnectionId + " Joined the group!");
-
-            SendGroupMessage(groupName, name, name.ToString() + " joined the group.");
-
-            return Groups.AddAsync(Context.ConnectionId, groupName);          
-
+            var group_name = GroupName();
+            await Groups.AddAsync(Context.ConnectionId, group_name);          
+            await Groups.AddAsync(connection, group_name);
+            await Clients.Group(group_name).InvokeAsync("groupjoined",group_name);
         }
 
         public Task LeaveGroup(string groupName)
@@ -42,6 +40,15 @@ namespace SignalRAttempt2
 
             Clients.Group(groupName).InvokeAsync("broadcastGroupMessage", name, message);
              
+        }
+
+        private string GroupName()
+        {
+            var randy = new Random();
+            const string pool = "abcdefghijklmnopqrstuvwxyz0123456789";
+            var chars = Enumerable.Range(0, 9)
+                .Select(x => pool[randy.Next(0, pool.Length)]);
+            return new string(chars.ToArray());
         }
 
 
