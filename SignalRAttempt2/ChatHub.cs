@@ -21,12 +21,12 @@ namespace SignalRAttempt2
         /// </summary>
         /// <param name="connection"></param>
         /// <returns></returns>
-        public async Task JoinGroup(string connection)
+        public async Task JoinGroup(string connection, string userToChat)
         {
             var group_name = GroupName();
             await Groups.AddAsync(Context.ConnectionId, group_name);          
             await Groups.AddAsync(connection, group_name);
-            await Clients.Group(group_name).InvokeAsync("groupjoined",group_name);
+            await Clients.Group(group_name).InvokeAsync("groupjoined",group_name, userToChat);
         }
 
         public Task LeaveGroup(string groupName)

@@ -66,22 +66,43 @@
                     // Add the message to the page.
                     var liElement = document.createElement('li'); 
                     liElement.setAttribute('connId', connId);
-                    liElement.onclick = function () {
-                        // TODO: make a new discussion holder with the... nah do this in the group joined call
-                   
+                    liGroupElement.setAttribute('user', encodedName); // Need to set the username in an attribute so we can pull it off to call joingroup with.
+                    liElement.onclick = function (evnt) {
+                        //Need the users connection ID
+                        var connId = evnt.target.attributes['connid'].value
+                        // also need the users name
+                        var user_name = evnt.target.attributes['user'].value
+                        // Call the server and join these users into a DM group.
+                        connection.invoke('joinGroup', connId, user_name);
                     };
                     liElement.innerHTML = '<strong>' + encodedName + '</strong>:&nbsp;&nbsp;' + encodedMsg;
                     document.getElementById('discussion-main').appendChild(liElement);
                 });
 
+                connection.on('groupjoined', function (groupName, usrToChatWith) {
+                    // TODO: make a new discussion holder with the conversation panel in it all coded and proper and sht.
+                    //1. add the new div
+                        // clicking it should scope the inputs to just this conversation and update the css appropriately.
+                    //2. put a label in there with this persons call sign
+                    //3. add a ul to hold the conversation with this person.
 
-                connection.on('broadcastGroupMessage', function (name, message) {
-                    var encodedName = name;
-                    var encodedMsg = message;
-                    var liGroupElement = document.createElement('li');
-                    liGroupElement.innerHTML = '<strong>' + encodedName + '</strong>:&nbsp;&nbsp;' + encodedMsg;
-                    document.getElementById('groupDiscussion').appendChild(liGroupElement)
-                });
+                    //1.
+                    var newDiv = document.createElement('div');
+                    newDiv.setAttribute('class', 'discussion-holder');
+                    newDiv.setAttribute('signalr-group', groupName);
+                    newDiv.setAttribute('class', 'current-convo'); // default to this conversation when the user starts a new group.
+                    newDiv.onclick =function (evnt) {
+                        // If they click it then we need to make sure that this conversation is being used.
+                        // 1. highlight the panel so its obvious to the user what is happening
+                        // 2. set a flag so the message sending code knows we are deailing with a group.
+                    }
+
+                    //2. Add a label with the user in questions name 
+                    var lbl = document.createElement("label");
+                    lbl.innerText = usrToChatWith + '-Chat';
+                    newDiv.appendChild(lbl);
+
+                })
 
             })
                 .then(function (connection) {
